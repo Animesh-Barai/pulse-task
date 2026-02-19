@@ -1,0 +1,110 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+tmp/
+tmp/*
+!.tmp/.gitkeep
+
+# Environment & Config
+.env
+.env.local
+.env.*.local
+*.log
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+.next/
+dist/
+build/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Infrastructure & Terraform
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.backup
+
+# PRIVATE: OpenCode configuration and agent data
+# Do NOT upload .opencode/ to GitHub - contains private configs, agent state, skills
+.opencode/
+.opencode/*/
+
+# PRIVATE: Temporary working files
+# Do NOT upload .tmp/ to GitHub - contains temporary data, coverage reports, task plans
+.tmp/
+.tmp/*
+
+# PUBLIC: Documentation
+# Keep docs/ tracked in GitHub
+!docs/
+
+# PRIVATE: AI models and data (if any)
+# Do NOT upload model files, training data
+*.pkl
+*.h5
+*.h5py
+*.onnx
+*.bin
+
+# PRIVATE: API keys and secrets
+# Do NOT upload any files containing keys, secrets, tokens
+*secrets.*
+*credentials.*
+*.key
+*.pem
+*.crt
+
+# CI/CD
+# CI artifacts (optional - uncomment if using GitHub Actions)
+# .github/workflows/*.log
+# .github/workflows/*/cache/
+
+# Local database (optional - uncomment if using local DB files)
+# *.db
+# *.sqlite
+# *.sqlite3
+
+# Debug files (optional - uncomment if needed)
+# debug.log
+# *.prof
