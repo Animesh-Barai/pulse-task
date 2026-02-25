@@ -388,3 +388,24 @@ def emit_task_deleted(task_data: Dict[str, Any]) -> None:
             room=workspace_id
         )
         logger.info(f"Task deleted broadcast for workspace {workspace_id}")
+
+
+def broadcast_crdt_update(workspace_id: str, crdt_data: Dict[str, Any]) -> None:
+    """
+    Helper function to broadcast CRDT document update to workspace.
+    Can be called from REST API endpoints.
+
+    Args:
+        workspace_id: Workspace ID to broadcast to
+        crdt_data: CRDT update data including doc_key, operation, etc.
+    """
+    if sio_server:
+        sio_server.emit(
+            "crdt_update",
+            {
+                **crdt_data,
+                "updated_at": datetime.utcnow().isoformat()
+            },
+            room=workspace_id
+        )
+        logger.info(f"CRDT update broadcast for workspace {workspace_id}")
