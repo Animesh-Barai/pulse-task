@@ -32,13 +32,15 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=settings.PASSWORD_MIN_LENGTH)
+    password: str = Field(...)
 
 
 class UserInDB(UserBase):
     id: Optional[str] = None
     password_hash: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    disabled: bool = False
+    expires_at: Optional[datetime] = None
 
 
 class User(UserBase):
