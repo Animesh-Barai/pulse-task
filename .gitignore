@@ -75,9 +75,8 @@ infra/terraform/*.tfstate.backup
 .tmp/
 .tmp/*
 
-# PUBLIC: Documentation
-# Keep docs/ tracked in GitHub
-!docs/
+# PRIVATE: Documentation
+docs/
 
 # PRIVATE: AI models and data (if any)
 # Do NOT upload model files, training data
