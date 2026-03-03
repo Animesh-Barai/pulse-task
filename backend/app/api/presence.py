@@ -4,7 +4,7 @@ Presence API Endpoints
 REST API endpoints for real-time presence tracking.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 
 from app.api.dependencies import get_current_user

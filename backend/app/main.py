@@ -9,6 +9,7 @@ from app.api import crdt
 from app.api import tasks
 from app.api import socket_events
 from app.api import presence
+from app.api import ai
 
 
 @asynccontextmanager
@@ -54,6 +55,7 @@ app.include_router(auth.router)
 app.include_router(crdt.router)
 app.include_router(tasks.router)
 app.include_router(presence.router)
+app.include_router(ai.router)
 
 # Mount Socket.IO on FastAPI (before other routes)
 app.mount("/socket.io", socket_app)

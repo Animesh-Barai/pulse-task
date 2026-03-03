@@ -1,0 +1,322 @@
+"""
+Integration Tests for Socket.IO Real-Time Collaboration
+
+Tests cover Socket.IO helper functions and their logic.
+Tests the functions that are used by REST APIs.
+
+Written for Phase 5 of Task 1.2: Socket.IO Integration
+"""
+
+import pytest
+from unittest.mock import MagicMock, patch
+from datetime import datetime
+
+from app.api.socket_events import (
+    sio_server,
+    emit_task_created,
+    emit_task_updated,
+    emit_task_deleted,
+    broadcast_crdt_update
+)
+
+
+@pytest.fixture
+def mock_sio_server():
+    """Create a mock Socket.IO server for testing."""
+    mock_sio = MagicMock()
+    return mock_sio
+
+
+@pytest.mark.asyncio
+class TestSocketIOHelpers:
+    """Integration tests for Socket.IO helper functions."""
+
+    # ========================================
+    # A. Task Event Helper Functions (3 tests)
+    # ========================================
+
+    async def test_emit_task_created(self, mock_sio_server):
+        """
+        Test: emit_task_created broadcasts to workspace
+
+        AAA Pattern:
+        - Arrange: Setup task data and mock sio_server
+        - Act: Patch sio_server, call emit_task_created
+        - Assert: Broadcast to room with timestamp
+
+        Success Criteria:
+        - Function emits task_created event
+        - Room targeting works
+        - Timestamp added
+        """
+        # Arrange
+        task_data = {
+            "task_id": "task_123",
+            "title": "New Test Task",
+            "workspace_id": "ws_456",
+            "user_id": "user_123"
+        }
+
+        # Mock global sio_server and patch to use mock
+        with patch('app.api.socket_events.sio_server', mock_sio_server):
+            # Act - Call emit_task_created
+            emit_task_created(task_data)
+
+            # Assert - Socket.IO broadcast called
+            mock_sio_server.emit.assert_called_once()
+            call_args = mock_sio_server.emit.call_args
+
+            # Check event name
+            assert call_args[0][0] == "task_created"
+
+            # Check room
+            assert call_args[1]["room"] == "ws_456"
+
+            # Check data includes timestamp
+            assert "created_at" in call_args[0][1]
+            assert call_args[0][1]["task_id"] == "task_123"
+            assert call_args[0][1]["title"] == "New Test Task"
+            assert call_args[0][1]["workspace_id"] == "ws_456"
+            assert call_args[0][1]["user_id"] == "user_123"
+
+    async def test_emit_task_updated(self, mock_sio_server):
+        """
+        Test: emit_task_updated broadcasts to workspace
+
+        AAA Pattern:
+        - Arrange: Setup task data and mock sio_server
+        - Act: Patch sio_server, call emit_task_updated
+        - Assert: Broadcast to room
+
+        Success Criteria:
+        - Function emits task_updated event
+        - Room targeting works
+        - No timestamp added (not created event)
+        """
+        # Arrange
+        task_data = {
+            "task_id": "task_123",
+            "title": "Updated Task Title",
+            "workspace_id": "ws_789",
+            "user_id": "user_456"
+        }
+
+        # Mock global sio_server and patch to use mock
+        with patch('app.api.socket_events.sio_server', mock_sio_server):
+            # Act - Call emit_task_updated
+            emit_task_updated(task_data)
+
+            # Assert - Socket.IO broadcast called
+            mock_sio_server.emit.assert_called_once()
+            call_args = mock_sio_server.emit.call_args
+
+            # Check event name
+            assert call_args[0][0] == "task_updated"
+
+            # Check room
+            assert call_args[1]["room"] == "ws_789"
+
+            # Check data
+            assert call_args[0][1]["task_id"] == "task_123"
+            assert call_args[0][1]["title"] == "Updated Task Title"
+            assert call_args[0][1]["workspace_id"] == "ws_789"
+            assert call_args[0][1]["user_id"] == "user_456"
+
+    async def test_emit_task_deleted(self, mock_sio_server):
+        """
+        Test: emit_task_deleted broadcasts to workspace
+
+        AAA Pattern:
+        - Arrange: Setup task data and mock sio_server
+        - Act: Patch sio_server, call emit_task_deleted
+        - Assert: Broadcast to room with timestamp
+
+        Success Criteria:
+        - Function emits task_deleted event
+        - Room targeting works
+        - Timestamp added
+        """
+        # Arrange
+        task_data = {
+            "task_id": "task_123",
+            "title": "Task to Delete",
+            "workspace_id": "ws_999",
+            "user_id": "user_789"
+        }
+
+        # Mock global sio_server and patch to use mock
+        with patch('app.api.socket_events.sio_server', mock_sio_server):
+            # Act - Call emit_task_deleted
+            emit_task_deleted(task_data)
+
+            # Assert - Socket.IO broadcast called
+            mock_sio_server.emit.assert_called_once()
+            call_args = mock_sio_server.emit.call_args
+
+            # Check event name
+            assert call_args[0][0] == "task_deleted"
+
+            # Check room
+            assert call_args[1]["room"] == "ws_999"
+
+            # Check data includes timestamp
+            assert "deleted_at" in call_args[0][1]
+            assert call_args[0][1]["task_id"] == "task_123"
+            assert call_args[0][1]["title"] == "Task to Delete"
+            assert call_args[0][1]["workspace_id"] == "ws_999"
+            assert call_args[0][1]["user_id"] == "user_789"
+
+    # ========================================
+    # B. CRDT Event Helper Functions (3 tests)
+    # ========================================
+
+    async def test_broadcast_crdt_update(self, mock_sio_server):
+        """
+        Test: broadcast_crdt_update broadcasts to workspace
+
+        AAA Pattern:
+        - Arrange: Setup CRDT data and mock sio_server
+        - Act: Patch sio_server, call broadcast_crdt_update
+        - Assert: Broadcast to room with timestamp
+
+        Success Criteria:
+        - Function broadcasts to room
+        - Room targeting works
+        - Timestamp added
+        """
+        # Arrange
+        workspace_id = "ws_222"
+        crdt_data = {
+            "doc_key": "ydoc_key_def",
+            "list_id": "ws_222",
+            "operation": "update",
+            "user_id": "user_222",
+            "content": "updated content"
+        }
+
+        # Mock global sio_server and patch to use mock
+        with patch('app.api.socket_events.sio_server', mock_sio_server):
+            # Act - Call broadcast_crdt_update
+            broadcast_crdt_update(workspace_id, crdt_data)
+
+            # Assert - Socket.IO broadcast called
+            mock_sio_server.emit.assert_called_once()
+            call_args = mock_sio_server.emit.call_args
+
+            # Check event name
+            assert call_args[0][0] == "crdt_update"
+
+            # Check room
+            assert call_args[1]["room"] == "ws_222"
+
+            # Check data includes timestamp
+            assert "updated_at" in call_args[0][1]
+            assert call_args[0][1]["doc_key"] == "ydoc_key_def"
+            assert call_args[0][1]["list_id"] == "ws_222"
+            assert call_args[0][1]["operation"] == "update"
+            assert call_args[0][1]["user_id"] == "user_222"
+            assert call_args[0][1]["content"] == "updated content"
+
+    async def test_broadcast_crdt_delete(self, mock_sio_server):
+        """
+        Test: broadcast_crdt_update for delete operation
+
+        AAA Pattern:
+        - Arrange: Setup CRDT delete data and mock sio_server
+        - Act: Patch sio_server, call broadcast_crdt_update
+        - Assert: Broadcast to room with timestamp
+
+        Success Criteria:
+        - Function broadcasts to room
+        - Room targeting works
+        - Timestamp added
+        """
+        # Arrange
+        workspace_id = "ws_333"
+        crdt_data = {
+            "doc_key": "ydoc_key_ghi",
+            "list_id": "ws_333",
+            "operation": "delete",
+            "user_id": "user_333"
+        }
+
+        # Mock global sio_server and patch to use mock
+        with patch('app.api.socket_events.sio_server', mock_sio_server):
+            # Act - Call broadcast_crdt_update
+            broadcast_crdt_update(workspace_id, crdt_data)
+
+            # Assert - Socket.IO broadcast called
+            mock_sio_server.emit.assert_called_once()
+            call_args = mock_sio_server.emit.call_args
+
+            # Check event name
+            assert call_args[0][0] == "crdt_update"
+
+            # Check room
+            assert call_args[1]["room"] == "ws_333"
+
+            # Check data includes timestamp
+            assert "updated_at" in call_args[0][1]
+            assert call_args[0][1]["doc_key"] == "ydoc_key_ghi"
+            assert call_args[0][1]["list_id"] == "ws_333"
+            assert call_args[0][1]["operation"] == "delete"
+            assert call_args[0][1]["user_id"] == "user_333"
+
+    async def test_emit_task_created_handles_none_sio_server(self):
+        """
+        Test: Helper functions handle None sio_server gracefully
+
+        AAA Pattern:
+        - Arrange: Setup sio_server as None
+        - Act: Call emit_task_created
+        - Assert: No error raised
+
+        Success Criteria:
+        - Function returns without error
+        - No broadcast attempted
+        """
+        # Arrange
+        task_data = {
+            "task_id": "task_123",
+            "workspace_id": "ws_456"
+            "user_id": "user_123"
+        }
+
+        # Mock sio_server as None
+        with patch('app.api.socket_events.sio_server', None):
+            # Act - Call emit_task_created
+            # This should not raise an error
+            result = emit_task_created(task_data)
+
+            # Assert - Returns without error
+            assert result is None
+
+    async def test_broadcast_crdt_update_handles_none_sio_server(self):
+        """
+        Test: broadcast_crdt_update handles None sio_server gracefully
+
+        AAA Pattern:
+        - Arrange: Setup sio_server as None
+        - Act: Call broadcast_crdt_update
+        - Assert: No error raised
+
+        Success Criteria:
+        - Function returns without error
+        - No broadcast attempted
+        """
+        # Arrange
+        workspace_id = "ws_222"
+        crdt_data = {
+            "doc_key": "ydoc_key_def",
+            "operation": "update",
+            "user_id": "user_222"
+        }
+
+        # Mock sio_server as None
+        with patch('app.api.socket_events.sio_server', None):
+            # Act - Call broadcast_crdt_update
+            # This should not raise an error
+            result = broadcast_crdt_update(workspace_id, crdt_data)
+
+            # Assert - Returns without error
+            assert result is None
