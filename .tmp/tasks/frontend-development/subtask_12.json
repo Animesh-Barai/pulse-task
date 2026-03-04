@@ -1,0 +1,28 @@
+{
+  "id": "frontend-development-12",
+  "seq": "12",
+  "title": "Create task badge components",
+  "status": "pending",
+  "depends_on": ["04"],
+  "parallel": true,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/ui/web/ui-styling-standards.md",
+    ".opencode/context/core/standards/code-quality.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md"
+  ],
+  "acceptance_criteria": [
+    "TaskPriorityBadge displays correct label for priority 1-5",
+    "TaskPriorityBadge uses correct color for each priority level",
+    "TaskStatusBadge displays correct label for OPEN, IN_PROGRESS, DONE",
+    "TaskStatusBadge uses correct color for each status",
+    "Badges are accessible and responsive",
+    "Components follow design system"
+  ],
+  "deliverables": [
+    "frontend/src/components/tasks/TaskPriorityBadge.tsx",
+    "frontend/src/components/tasks/TaskStatusBadge.tsx"
+  ]
+}

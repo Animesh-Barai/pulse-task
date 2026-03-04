@@ -1,0 +1,35 @@
+{
+  "id": "frontend-development-24",
+  "seq": "24",
+  "title": "Write E2E tests for core workflows",
+  "status": "pending",
+  "depends_on": ["09", "14", "22"],
+  "parallel": true,
+  "suggested_agent": "TestEngineer",
+  "context_files": [
+    ".opencode/context/core/standards/test-coverage.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md"
+  ],
+  "acceptance_criteria": [
+    "E2E test for signup flow (navigate, fill form, submit, redirect)",
+    "E2E test for login flow (navigate, fill form, submit, redirect)",
+    "E2E test for logout flow",
+    "E2E test for create task flow",
+    "E2E test for update task flow",
+    "E2E test for delete task flow",
+    "E2E test for task filtering",
+    "E2E test for real-time task updates across browsers",
+    "E2E test for AI suggestion acceptance",
+    "All E2E tests pass",
+    "Playwright configuration created"
+  ],
+  "deliverables": [
+    "frontend/playwright.config.ts",
+    "frontend/e2e/auth.spec.ts",
+    "frontend/e2e/tasks.spec.ts",
+    "frontend/e2e/realtime.spec.ts",
+    "frontend/e2e/ai.spec.ts"
+  ]
+}

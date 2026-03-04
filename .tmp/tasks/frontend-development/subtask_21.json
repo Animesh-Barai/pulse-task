@@ -1,0 +1,32 @@
+{
+  "id": "frontend-development-21",
+  "seq": "21",
+  "title": "Create AI hook and components",
+  "status": "pending",
+  "depends_on": ["20"],
+  "parallel": false,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/ui/web/ui-styling-standards.md",
+    ".opencode/context/core/standards/code-quality.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md"
+  ],
+  "acceptance_criteria": [
+    "useAISuggestions hook provides rewrite and accept mutations",
+    "ConfidenceBadge displays correct color based on confidence level",
+    "ConfidenceBadge displays confidence percentage",
+    "AISuggestionCard shows rewritten title",
+    "AISuggestionCard shows suggested checklist",
+    "AISuggestionCard shows suggested priority and due date",
+    "AISuggestionCard shows explanation",
+    "AISuggestionCard has accept and dismiss buttons",
+    "Components are accessible and responsive"
+  ],
+  "deliverables": [
+    "frontend/src/hooks/useAISuggestions.ts",
+    "frontend/src/components/ai/ConfidenceBadge.tsx",
+    "frontend/src/components/ai/AISuggestionCard.tsx"
+  ]
+}

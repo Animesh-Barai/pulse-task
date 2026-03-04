@@ -1,0 +1,28 @@
+{
+  "id": "frontend-development",
+  "name": "Frontend Development",
+  "status": "active",
+  "objective": "Build complete React application with authentication, task management, real-time features, and AI suggestions",
+  "context_files": [
+    ".opencode/context/core/standards/code-quality.md",
+    ".opencode/context/core/standards/documentation.md",
+    ".opencode/context/core/standards/test-coverage.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md",
+    "frontend/package.json",
+    "docs/API_DOCUMENTATION.md"
+  ],
+  "exit_criteria": [
+    "React application builds without errors",
+    "All authentication flows work (login, signup, logout, protected routes)",
+    "Task CRUD operations fully functional",
+    "Real-time updates work across multiple clients",
+    "AI suggestions appear and can be accepted",
+    "Unit tests pass with >80% coverage",
+    "E2E tests pass for core user workflows"
+  ],
+  "subtask_count": 24,
+  "completed_count": 1,
+  "created_at": "2026-03-04T00:00:00Z"
+}

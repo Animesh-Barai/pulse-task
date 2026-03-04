@@ -1,0 +1,32 @@
+{
+  "id": "frontend-development-23",
+  "seq": "23",
+  "title": "Write unit tests for AI features",
+  "status": "pending",
+  "depends_on": ["22"],
+  "parallel": true,
+  "suggested_agent": "TestEngineer",
+  "context_files": [
+    ".opencode/context/core/standards/test-coverage.md"
+  ],
+  "reference_files": [
+    "frontend/src/hooks/useAISuggestions.ts",
+    "frontend/src/components/ai/*.tsx"
+  ],
+  "acceptance_criteria": [
+    "Unit tests for useAISuggestions hook",
+    "Unit tests for ConfidenceBadge component",
+    "Unit tests for AISuggestionCard component",
+    "Unit tests for AI integration in TaskForm",
+    "Tests use AAA pattern",
+    "Tests mock AI service appropriately",
+    "All tests pass",
+    "Test coverage >80% for AI components"
+  ],
+  "deliverables": [
+    "frontend/src/hooks/__tests__/useAISuggestions.test.ts",
+    "frontend/src/components/ai/__tests__/ConfidenceBadge.test.tsx",
+    "frontend/src/components/ai/__tests__/AISuggestionCard.test.tsx",
+    "frontend/src/components/tasks/__tests__/TaskForm.ai.test.tsx"
+  ]
+}

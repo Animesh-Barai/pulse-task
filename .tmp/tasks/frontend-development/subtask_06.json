@@ -1,0 +1,29 @@
+{
+  "id": "frontend-development-06",
+  "seq": "06",
+  "title": "Create auth service and hook",
+  "status": "pending",
+  "depends_on": ["05"],
+  "parallel": false,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/core/standards/code-quality.md",
+    ".opencode/context/core/standards/test-coverage.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md",
+    "docs/API_DOCUMENTATION.md"
+  ],
+  "acceptance_criteria": [
+    "authService implements login, signup, refreshToken, logout",
+    "useAuth hook integrates with authStore and React Query",
+    "Login mutation stores user and tokens on success",
+    "Signup mutation stores user and tokens on success",
+    "Logout mutation clears auth state and redirects",
+    "Hook returns isAuthenticated, loading, and action functions"
+  ],
+  "deliverables": [
+    "frontend/src/services/authService.ts",
+    "frontend/src/hooks/useAuth.ts"
+  ]
+}

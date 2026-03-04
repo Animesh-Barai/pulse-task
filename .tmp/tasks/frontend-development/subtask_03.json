@@ -1,0 +1,31 @@
+{
+  "id": "frontend-development-03",
+  "seq": "03",
+  "title": "Create TypeScript type definitions",
+  "status": "pending",
+  "depends_on": ["01"],
+  "parallel": true,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/core/standards/code-quality.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md",
+    "docs/API_DOCUMENTATION.md"
+  ],
+  "acceptance_criteria": [
+    "Auth types defined (User, AuthTokens, LoginRequest, SignupRequest)",
+    "Task types defined (Task, CreateTaskRequest, UpdateTaskRequest, TaskFilters)",
+    "AI types defined (AISuggestion, AISuggestionRequest)",
+    "Socket types defined (SocketEvents with all events)",
+    "All types export from src/types/index.ts",
+    "TypeScript compiles without type errors"
+  ],
+  "deliverables": [
+    "frontend/src/types/index.ts",
+    "frontend/src/types/auth.ts",
+    "frontend/src/types/task.ts",
+    "frontend/src/types/ai.ts",
+    "frontend/src/types/socket.ts"
+  ]
+}

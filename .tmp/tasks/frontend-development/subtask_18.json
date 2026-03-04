@@ -1,0 +1,31 @@
+{
+  "id": "frontend-development-18",
+  "seq": "18",
+  "title": "Create real-time components (Presence, Typing)",
+  "status": "pending",
+  "depends_on": ["17"],
+  "parallel": true,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/ui/web/ui-styling-standards.md",
+    ".opencode/context/core/standards/code-quality.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md"
+  ],
+  "acceptance_criteria": [
+    "PresenceIndicator shows online user count when connected",
+    "PresenceIndicator displays with pulsing green dot",
+    "PresenceIndicator returns null when disconnected",
+    "TypingIndicator shows 'X user(s) are typing...' message",
+    "TypingIndicator returns null when no one typing",
+    "TypingIndicator has animated pulse effect",
+    "Components are accessible and responsive",
+    "Components use useSocket hook"
+  ],
+  "deliverables": [
+    "frontend/src/components/realtime/PresenceIndicator.tsx",
+    "frontend/src/components/realtime/TypingIndicator.tsx",
+    "frontend/src/components/realtime/CursorTracker.tsx"
+  ]
+}

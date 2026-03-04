@@ -1,0 +1,31 @@
+{
+  "id": "frontend-development-07",
+  "seq": "07",
+  "title": "Create common UI components",
+  "status": "pending",
+  "depends_on": ["04"],
+  "parallel": true,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/ui/web/ui-styling-standards.md",
+    ".opencode/context/core/standards/code-quality.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md"
+  ],
+  "acceptance_criteria": [
+    "Input component supports label, error, fullWidth props",
+    "Button component supports variant, size, loading, fullWidth props",
+    "LoadingSpinner component supports sm, md, lg sizes",
+    "ErrorBoundary catches errors and shows fallback UI",
+    "All components follow 4-stage design workflow",
+    "Components are responsive at all breakpoints"
+  ],
+  "deliverables": [
+    "frontend/src/components/common/Input.tsx",
+    "frontend/src/components/common/Button.tsx",
+    "frontend/src/components/common/LoadingSpinner.tsx",
+    "frontend/src/components/common/ErrorBoundary.tsx",
+    "frontend/src/components/common/Modal.tsx"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "frontend-development-09",
+  "seq": "09",
+  "title": "Create Signup page with validation",
+  "status": "pending",
+  "depends_on": ["06", "07"],
+  "parallel": true,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/ui/web/ui-styling-standards.md",
+    ".opencode/context/core/standards/code-quality.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md",
+    "docs/API_DOCUMENTATION.md"
+  ],
+  "acceptance_criteria": [
+    "Signup form has name, email, password, confirm password fields",
+    "Form validation checks all fields are filled",
+    "Form validation checks password match",
+    "Form validation checks password minimum length",
+    "Signup mutation calls useAuth hook on submit",
+    "Success redirects to dashboard",
+    "Error displays user-friendly message",
+    "Link to login page provided"
+  ],
+  "deliverables": [
+    "frontend/src/pages/Signup.tsx"
+  ]
+}

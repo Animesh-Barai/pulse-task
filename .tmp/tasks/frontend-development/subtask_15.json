@@ -1,0 +1,34 @@
+{
+  "id": "frontend-development-15",
+  "seq": "15",
+  "title": "Write unit tests for task management",
+  "status": "pending",
+  "depends_on": ["14"],
+  "parallel": true,
+  "suggested_agent": "TestEngineer",
+  "context_files": [
+    ".opencode/context/core/standards/test-coverage.md"
+  ],
+  "reference_files": [
+    "frontend/src/hooks/useTasks.ts",
+    "frontend/src/components/tasks/*.tsx"
+  ],
+  "acceptance_criteria": [
+    "Unit tests for useTasks hook cover all mutations",
+    "Unit tests for TaskForm component",
+    "Unit tests for TaskFilter component",
+    "Unit tests for TaskList component",
+    "Unit tests for TaskItem component",
+    "Tests use AAA pattern",
+    "Tests mock dependencies appropriately",
+    "All tests pass",
+    "Test coverage >80% for task components"
+  ],
+  "deliverables": [
+    "frontend/src/hooks/__tests__/useTasks.test.ts",
+    "frontend/src/components/tasks/__tests__/TaskForm.test.tsx",
+    "frontend/src/components/tasks/__tests__/TaskFilter.test.tsx",
+    "frontend/src/components/tasks/__tests__/TaskList.test.tsx",
+    "frontend/src/components/tasks/__tests__/TaskItem.test.tsx"
+  ]
+}

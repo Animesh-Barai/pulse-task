@@ -1,0 +1,30 @@
+{
+  "id": "frontend-development-17",
+  "seq": "17",
+  "title": "Create socket hook for integration",
+  "status": "pending",
+  "depends_on": ["16"],
+  "parallel": false,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/core/standards/code-quality.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md"
+  ],
+  "acceptance_criteria": [
+    "useSocket hook connects socket when auth token available",
+    "useSocket hook disconnects on unmount",
+    "useSocket hook listens for presence_update events",
+    "useSocket hook listens for ydoc_update events",
+    "useSocket hook listens for task_broadcast events",
+    "useSocket hook listens for ai_suggestion events",
+    "useSocket hook listens for task_blocked events",
+    "useSocket hook listens for cursor_update events",
+    "useSocket hook listens for typing_indicator events",
+    "Hook returns socket instance and connected status"
+  ],
+  "deliverables": [
+    "frontend/src/hooks/useSocket.ts"
+  ]
+}

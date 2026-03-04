@@ -1,0 +1,27 @@
+{
+  "id": "frontend-development-20",
+  "seq": "20",
+  "title": "Create AI service for suggestions",
+  "status": "pending",
+  "depends_on": ["05"],
+  "parallel": true,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/core/standards/code-quality.md",
+    ".opencode/context/core/standards/documentation.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md",
+    "docs/API_DOCUMENTATION.md"
+  ],
+  "acceptance_criteria": [
+    "aiService.rewriteTask calls /api/v1/ai/rewrite endpoint",
+    "aiService.acceptSuggestion calls accept endpoint",
+    "Methods typed with AISuggestion and AISuggestionRequest",
+    "Service handles API errors appropriately",
+    "Service returns typed responses"
+  ],
+  "deliverables": [
+    "frontend/src/services/aiService.ts"
+  ]
+}

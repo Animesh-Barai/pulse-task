@@ -1,0 +1,30 @@
+{
+  "id": "frontend-development-16",
+  "seq": "16",
+  "title": "Create Socket.IO service",
+  "status": "pending",
+  "depends_on": ["04"],
+  "parallel": true,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/core/standards/code-quality.md",
+    ".opencode/context/core/standards/documentation.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md",
+    "docs/API_DOCUMENTATION.md"
+  ],
+  "acceptance_criteria": [
+    "SocketService creates Socket.IO instance with auth token",
+    "SocketService.connect returns existing socket if connected",
+    "SocketService.emit sends events to server",
+    "SocketService.on registers event listeners",
+    "SocketService.off removes event listeners",
+    "SocketService.disconnect closes connection",
+    "Connection and disconnect events logged",
+    "Error handling for connection errors"
+  ],
+  "deliverables": [
+    "frontend/src/services/socketService.ts"
+  ]
+}

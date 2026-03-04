@@ -1,0 +1,31 @@
+{
+  "id": "frontend-development-04",
+  "seq": "04",
+  "title": "Create state management and global styles",
+  "status": "pending",
+  "depends_on": ["02", "03"],
+  "parallel": false,
+  "suggested_agent": "OpenFrontendSpecialist",
+  "context_files": [
+    ".opencode/context/core/standards/code-quality.md"
+  ],
+  "reference_files": [
+    "docs/PHASE2_CORE_FRONTEND.md"
+  ],
+  "acceptance_criteria": [
+    "Zustand authStore created with persistence middleware",
+    "Zustand taskStore created with CRUD actions",
+    "Zustand socketStore created with connection management",
+    "Global CSS variables defined in variables.css",
+    "Global styles with utility classes in global.css",
+    "Styles apply correctly to rendered components"
+  ],
+  "deliverables": [
+    "frontend/src/store/index.ts",
+    "frontend/src/store/authStore.ts",
+    "frontend/src/store/taskStore.ts",
+    "frontend/src/store/socketStore.ts",
+    "frontend/src/styles/variables.css",
+    "frontend/src/styles/global.css"
+  ]
+}
