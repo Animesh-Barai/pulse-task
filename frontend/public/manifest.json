@@ -1,0 +1,15 @@
+{
+  "short_name": "PulseTasks",
+  "name": "PulseTasks - Real-time Collaborative Task Management",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "16x16",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9"
+}
