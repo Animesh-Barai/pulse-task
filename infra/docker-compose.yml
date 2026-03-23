@@ -23,7 +23,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
     container_name: pulsetasks-backend
     ports:
@@ -34,8 +34,7 @@ services:
       - SECRET_KEY=dev-secret-key-change-in-production
       - ENVIRONMENT=development
     volumes:
-      - ./backend:/app
-      - .venv:/app/.venv
+      - ../backend:/app
     depends_on:
       - mongodb
       - redis
@@ -43,7 +42,7 @@ services:
 
   ai-service:
     build:
-      context: ./ai-service
+      context: ../ai-service
       dockerfile: Dockerfile
     container_name: pulsetasks-ai-service
     ports:
@@ -53,20 +52,27 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
     volumes:
-      - ./ai-service:/app
+      - ../ai-service:/app
     depends_on:
       - redis
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
     container_name: pulsetasks-frontend
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app
+      - ../frontend:/app
       - /app/node_modules
     environment:
       - VITE_API_URL=http://localhost:8000
@@ -76,7 +82,7 @@ services:
 
   celery-worker:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
     container_name: pulsetasks-celery-worker
     environment:
@@ -84,8 +90,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=dev-secret-key-change-in-production
     volumes:
-      - ./backend:/app
-      - .venv:/app/.venv
+      - ../backend:/app
     depends_on:
       - mongodb
       - redis

@@ -13,18 +13,7 @@ celery==5.3.6
 httpx==0.26.0
 pyyaml==6.0.1
 python-dotenv==1.0.0
-
-# Testing
-pytest==7.4.4
-pytest-asyncio==0.23.3
-pytest-cov==4.1.0
-httpx==0.26.0
-
-# Code quality
-black==24.1.1
-flake8==7.0.0
-mypy==1.8.0
-isort==5.13.2
+email-validator>=2.0.0
 
 # Monitoring
 prometheus-client==0.19.0

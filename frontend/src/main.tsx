@@ -1,10 +1,11 @@
-import { StrictMode } from 'react-dom/client'
-import { router } from './App'
+import React, { StrictMode } from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
 import './styles/global.css'
 
-ReactDOM.createRoot(
-  document.getElementById('root')!,
+console.log('PulseTask Frontend: v2 (Interactive Mode Active)');
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    {router}
+    <App />
   </React.StrictMode>
 )

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends, Response
 from typing import List, Optional
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from app.models.models import Task, TaskCreate, TaskUpdate, TaskStatus, Priority
+from app.models.models import Task, TaskCreate, TaskUpdate, TaskStatus, Priority, User
 from app.services.task_service import (
     create_task,
     get_task_by_id,
@@ -10,7 +10,7 @@ from app.services.task_service import (
     update_task,
     delete_task,
 )
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, get_optional_current_user
 from app.db.database import get_database
 from app.api.socket_events import (
     emit_task_created,
@@ -25,9 +25,11 @@ router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 @router.post("", response_model=Task, status_code=status.HTTP_201_CREATED)
 async def create_task_endpoint(
     task: TaskCreate,
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
+    # For demo/sync purposes, allow creation without auth
+    user_id = str(current_user.id) if current_user else "000000000000000000000000"
     """
     Create a new task.
 
@@ -42,7 +44,7 @@ async def create_task_endpoint(
             "task_id": result.id,
             "title": result.title,
             "workspace_id": result.list_id,
-            "user_id": current_user["id"]
+            "user_id": user_id
         }
         emit_task_created(task_data)
     except Exception as e:
@@ -55,7 +57,7 @@ async def create_task_endpoint(
 @router.get("/{task_id}", response_model=Task)
 async def get_task_endpoint(
     task_id: str,
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
     """
@@ -80,7 +82,7 @@ async def list_tasks_endpoint(
     sort: Optional[str] = None,
     skip: Optional[int] = None,
     limit: Optional[int] = None,
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
     """
@@ -104,7 +106,7 @@ async def list_tasks_endpoint(
 async def update_task_endpoint(
     task_id: str,
     task_update: TaskUpdate,
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
     """
