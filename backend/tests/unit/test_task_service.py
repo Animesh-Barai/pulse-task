@@ -1,5 +1,10 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+# Enable method chaining on MagicMocks for database cursor operations
+MagicMock.sort = lambda self, *args, **kwargs: self
+MagicMock.skip = lambda self, *args, **kwargs: self
+
 from app.models.models import Task, TaskCreate, TaskUpdate, TaskStatus, Priority
 from datetime import datetime, timedelta
 from pydantic import ValidationError
@@ -1290,10 +1295,7 @@ class TestSortByCreatedDate:
             await sort_by_created_date(list_id, "invalid_direction", mock_db)
 
 
-# Custom exception for invalid task status transitions
-class InvalidTransitionError(Exception):
-    """Raised when attempting an invalid task status transition."""
-    pass
+from app.services.task_service import InvalidTransitionError
 
 
 @pytest.mark.asyncio

@@ -114,7 +114,7 @@ class TestPresenceServiceSimple:
             "user_123",
             "workspace_123",
             "online",
-            mock_redis
+            redis_client=mock_redis
         )
 
         mock_set.assert_called_once()
@@ -151,7 +151,7 @@ class TestPresenceServiceSimple:
         result = await remove_user_presence("user_123", "workspace_123", mock_redis)
 
         assert result is True
-        mock_delete.assert_called_once()
+        assert mock_delete.call_count == 3
 
 
 @pytest.mark.asyncio

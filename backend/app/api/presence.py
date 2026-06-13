@@ -16,7 +16,8 @@ from app.services.presence_service import (
     set_user_typing,
     get_user_typing_status,
     get_cursor_positions,
-    remove_user_presence
+    remove_user_presence,
+    cleanup_expired_presence
 )
 
 
@@ -60,9 +61,52 @@ class CursorPositionRequest(BaseModel):
 class CursorPositionsResponse(BaseModel):
     workspace_id: str
     cursor_positions: Dict[str, Dict[str, Any]]
+class PresenceUpdateRequest(BaseModel):
+    workspace_id: str
+    status: str
 
 
 # API Endpoints
+
+@router.post("", status_code=status.HTTP_200_OK)
+async def update_presence_endpoint(
+    request: PresenceUpdateRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Update user presence status in a workspace.
+    """
+    redis = get_redis()
+
+    if not redis:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Redis service not available"
+        )
+
+    try:
+        success = await update_user_presence(
+            user_id=str(current_user.id),
+            workspace_id=request.workspace_id,
+            presence=request.status,
+            user_name=current_user.name,
+            redis_client=redis
+        )
+
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to update presence status"
+            )
+
+        return {"status": "success", "message": "Presence updated"}
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating presence status: {str(e)}"
+        )
+
 
 @router.get("/workspaces/{workspace_id}", response_model=WorkspaceUsersResponse)
 async def get_workspace_presence(

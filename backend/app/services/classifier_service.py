@@ -135,21 +135,25 @@ async def mock_classify(
     context: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
-    Mock classifier using heuristics.
-
-    For MVP, this simulates a local ML classifier by using heuristics.
-    In production, this would call DistilBERT or scikit-learn model.
-
-    Args:
-        raw_title: The raw task title
-        raw_description: The raw task description
-        context: Additional context
-
-    Returns:
-        Classification result dictionary
+    Call AI Service microservice for task classification.
     """
-    # Use heuristics as the mock model
-    return await heuristics_suggest(raw_title, raw_description, context)
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                f"{settings.AI_SERVICE_URL}/ai/suggest/task",
+                json={
+                    "raw_title": raw_title,
+                    "raw_description": raw_description,
+                    "context": context
+                }
+            )
+            response.raise_for_status()
+            return response.json()
+    except Exception as e:
+        # Fallback to local heuristics on connection/API error
+        from app.services.heuristics_service import generate_suggestion
+        return await generate_suggestion(raw_title, raw_description, context)
 
 
 def add_metadata_to_result(

@@ -6,6 +6,8 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.api import auth
 from app.api import tasks
+from app.api import crdt
+from app.api import presence
 
 
 @asynccontextmanager
@@ -32,6 +34,9 @@ app.add_middleware(
 # Only include routers that work without dependencies
 app.include_router(auth.router)
 app.include_router(tasks.router)
+app.include_router(crdt.router)
+app.include_router(crdt.offline_router)
+app.include_router(presence.router)
 
 
 @app.get("/health")

@@ -120,7 +120,7 @@ class TestAuthService:
         Edge Case: Exactly 7 characters (1 below minimum)
         """
         # Given
-        user_data = UserCreate(
+        user_data = UserCreate.model_construct(
             email="test2@example.com",
             name="Test User",
             password="Short1"  # 7 characters
@@ -233,7 +233,7 @@ class TestAuthService:
         
         Sad Path: Empty password
         """
-        user_data = UserCreate(
+        user_data = UserCreate.model_construct(
             email="test5@example.com",
             name="Test User",
             password=""

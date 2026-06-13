@@ -25,11 +25,10 @@ router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 @router.post("", response_model=Task, status_code=status.HTTP_201_CREATED)
 async def create_task_endpoint(
     task: TaskCreate,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
-    # For demo/sync purposes, allow creation without auth
-    user_id = str(current_user.id) if current_user else "000000000000000000000000"
+    user_id = str(current_user.id)
     """
     Create a new task.
 
@@ -57,7 +56,7 @@ async def create_task_endpoint(
 @router.get("/{task_id}", response_model=Task)
 async def get_task_endpoint(
     task_id: str,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
     """
@@ -82,7 +81,7 @@ async def list_tasks_endpoint(
     sort: Optional[str] = None,
     skip: Optional[int] = None,
     limit: Optional[int] = None,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
     """
@@ -106,7 +105,7 @@ async def list_tasks_endpoint(
 async def update_task_endpoint(
     task_id: str,
     task_update: TaskUpdate,
-    current_user: Optional[User] = Depends(get_optional_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
     """
@@ -117,6 +116,10 @@ async def update_task_endpoint(
     """
     try:
         result = await update_task(task_id, task_update, db)
+        if result is None:
+            raise HTTPException(status_code=404, detail="Task not found")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -126,7 +129,7 @@ async def update_task_endpoint(
             "task_id": task_id,
             "title": result.title,
             "workspace_id": result.list_id,
-            "user_id": current_user["id"]
+            "user_id": current_user.id
         }
         emit_task_updated(task_data)
     except Exception as e:
@@ -139,7 +142,7 @@ async def update_task_endpoint(
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task_endpoint(
     task_id: str,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database),
 ):
     """
@@ -161,7 +164,7 @@ async def delete_task_endpoint(
             "task_id": task_id,
             "title": task.title,
             "workspace_id": task.list_id,
-            "user_id": current_user["id"]
+            "user_id": current_user.id
         }
         emit_task_deleted(task_data)
     except Exception as e:

@@ -1,11 +1,18 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
+import json
 from app.models.models import TaskList
 from app.services.crdt_service import create_ydoc, get_ydoc
 from app.services.presence_service import update_user_presence, remove_user_presence
 from app.services.offline_service import queue_offline_operations
-from app.services.socket_helpers import handle_ydoc_update, simple_socket_manager
+from app.services.socket_helpers import (
+    handle_ydoc_update,
+    simple_socket_manager,
+    user_join_workspace,
+    user_leave_workspace,
+    broadcast_to_workspace
+)
 
 
 @pytest.mark.asyncio
@@ -22,7 +29,7 @@ class TestCRDTService:
 
         from app.services.crdt_service import create_ydoc
 
-        result = await create_ydoc(mock_db, "list_123", "My Task List")
+        result = await create_ydoc("list_123", "My Task List", mock_db)
 
         assert result is not None
         assert result.id == "ydoc_123"
@@ -31,19 +38,19 @@ class TestCRDTService:
     async def test_get_ydoc_exists(self):
         """Test getting an existing Yjs document."""
         mock_db = AsyncMock()
-        mock_doc = TaskList(
-            id="ydoc_123",
-            list_id="list_123",
-            title="My Task List",
-            y_doc_key="doc_key_abc",
-            created_at=datetime.utcnow()
-        )
+        mock_doc = {
+            "_id": "ydoc_123",
+            "workspace_id": "list_123",
+            "title": "My Task List",
+            "y_doc_key": "doc_key_abc",
+            "created_at": datetime.utcnow()
+        }
 
         mock_db.ydocs = MagicMock()
         mock_db.ydocs.find_one = AsyncMock(return_value=mock_doc)
 
         from app.services.crdt_service import get_ydoc
-        result = await get_ydoc("ydoc_abc", mock_db)
+        result = await get_ydoc("doc_key_abc", mock_db)
 
         assert result is not None
         assert result.title == "My Task List"
@@ -101,8 +108,8 @@ class TestCRDTService:
         mock_db = AsyncMock()
         mock_cursor = MagicMock()
         mock_cursor.to_list = AsyncMock(return_value=[
-            {"id": "ydoc_1", "title": "List 1", "list_id": "list_123"},
-            {"id": "ydoc_2", "title": "List 2", "list_id": "list_123"}
+            {"_id": "ydoc_1", "title": "List 1", "workspace_id": "list_123", "y_doc_key": "key1", "created_at": datetime.utcnow()},
+            {"_id": "ydoc_2", "title": "List 2", "workspace_id": "list_123", "y_doc_key": "key2", "created_at": datetime.utcnow()}
         ])
 
         mock_db.ydocs = MagicMock()
@@ -123,38 +130,45 @@ class TestPresenceService:
     async def test_track_user_presence(self):
         """Test tracking user presence in workspace."""
         mock_redis = AsyncMock()
-        mock_set = AsyncMock()
+        mock_redis.setex = AsyncMock()
 
-        # Mock datetime.utcnow for TDD
-        mock_datetime = MagicMock(return_value=datetime.utcnow())
+        fixed_dt = datetime(2026, 2, 26, 12, 0, 0)
+        with patch('app.services.presence_service.datetime') as mock_datetime:
+            mock_datetime.utcnow.return_value = fixed_dt
 
-        with patch('app.services.presence_service.update_user_presence', return_value=None):
-            with patch('datetime.datetime', 'utcnow', return_value=mock_datetime):
+            await update_user_presence(
+                user_id="user_123",
+                workspace_id="workspace_123",
+                presence="online",
+                user_name="Alice",
+                redis_client=mock_redis
+            )
 
-                await update_user_presence(
-                    "user_123",
-                    "workspace_123",
-                    "online",
-                    mock_redis
-                )
-
-        mock_set.assert_called_once()
-        # Verify 5-minute expiry
-        mock_set.assert_called_with(
-            key="presence:workspace_123:user_123",
-            value=any,
-            time=300
-        )
+        mock_redis.setex.assert_called_once()
+        args, kwargs = mock_redis.setex.call_args
+        assert args[0] == "presence:workspace_123:user_123"
+        assert args[1] == 300
+        val = json.loads(args[2])
+        assert val["user_id"] == "user_123"
+        assert val["presence"] == "online"
+        assert val["last_seen"] == fixed_dt.isoformat()
 
     async def test_get_workspace_users(self):
         """Test getting all online users in workspace."""
         mock_redis = AsyncMock()
-        mock_members = AsyncMock(return_value=[
-            {"user_id": "user_123", "presence": "online"},
-            {"user_id": "user_456", "presence": "online"}
+        mock_redis.keys = AsyncMock(return_value=[
+            "presence:workspace_123:user_123",
+            "presence:workspace_123:user_456"
         ])
-
-        mock_redis.smembers = mock_members
+        
+        async def mock_get(key):
+            if "user_123" in key:
+                return json.dumps({"user_id": "user_123", "presence": "online"})
+            elif "user_456" in key:
+                return json.dumps({"user_id": "user_456", "presence": "online"})
+            return None
+            
+        mock_redis.get = AsyncMock(side_effect=mock_get)
 
         from app.services.presence_service import get_workspace_users
 
@@ -167,12 +181,11 @@ class TestPresenceService:
     async def test_remove_user_presence(self):
         """Test removing user presence from workspace."""
         mock_redis = AsyncMock()
-        mock_delete = AsyncMock()
+        mock_redis.delete = AsyncMock()
 
-        with patch('app.services.presence_service.remove_user_presence', return_value=None):
-            await remove_user_presence("user_123", "workspace_123", mock_redis)
+        await remove_user_presence("user_123", "workspace_123", mock_redis)
 
-        mock_delete.assert_called_once()
+        assert mock_redis.delete.call_count == 3
 
 
 @pytest.mark.asyncio
@@ -181,11 +194,8 @@ class TestOfflineMergeService:
         """Test queuing offline operations for later sync."""
         mock_redis = AsyncMock()
         mock_lpush = AsyncMock()
-
-        # Mock datetime.utcnow for TDD
-        mock_datetime = MagicMock(return_value=datetime.utcnow())
-
         mock_redis.lpush = mock_lpush
+        mock_redis.expire = AsyncMock()
 
         from app.services.offline_service import queue_offline_operations
 
@@ -203,8 +213,8 @@ class TestOfflineMergeService:
         mock_redis = AsyncMock()
         mock_lrange = AsyncMock()
         mock_lrange.return_value = [
-            {"type": "insert", "text": "Task 1", "position": 0},
-            {"type": "insert", "text": "Task 2", "position": 1}
+            json.dumps({"type": "insert", "text": "Task 1", "position": 0}),
+            json.dumps({"type": "insert", "text": "Task 2", "position": 1})
         ]
 
         mock_redis.lrange = mock_lrange
@@ -221,65 +231,51 @@ class TestOfflineMergeService:
     async def test_clear_queued_operations(self):
         """Test clearing queued operations after sync."""
         mock_redis = AsyncMock()
-        mock_delete = AsyncMock()
+        mock_redis.delete = AsyncMock(return_value=1)
 
         from app.services.offline_service import clear_queued_operations
 
-        with patch('app.services.offline_service.clear_queued_operations', return_value=True):
-            await clear_queued_operations("user_123", "ydoc_abc", mock_redis)
+        result = await clear_queued_operations("user_123", "ydoc_abc", mock_redis)
 
-            mock_delete.assert_called_once()
+        assert result is True
+        mock_redis.delete.assert_called_once_with("offline_ops:user_123:ydoc_abc")
 
 
-@pytest.mark.asyncio
 class TestSocketEvents:
-    async def test_user_join_workspace(self):
+    def test_user_join_workspace(self):
         """Test user joining workspace room."""
-        # Test expects sio_manager to be passed as second positional param
         mock_socket_manager = MagicMock()
 
-        with patch('app.services.socket_helpers.simple_socket_manager', return_value=mock_socket_manager):
-
-            await user_join_workspace(
+        with patch('app.services.socket_helpers.simple_socket_manager', mock_socket_manager):
+            user_join_workspace(
                 "user_123",
                 "Alice",
-                "workspace_123",
-                mock_socket_manager
+                "workspace_123"
             )
 
         mock_socket_manager.join_room.assert_called_once_with("user_123", "workspace_123")
 
-    async def test_user_leave_workspace(self):
+    def test_user_leave_workspace(self):
         """Test user leaving workspace room."""
-        # Test expects sio_manager as second positional param
         mock_socket_manager = MagicMock()
 
-        with patch('app.services.socket_helpers.simple_socket_manager', return_value=mock_socket_manager):
-
-            await user_leave_workspace(
+        with patch('app.services.socket_helpers.simple_socket_manager', mock_socket_manager):
+            user_leave_workspace(
                 "user_123",
-                "workspace_123",
-                mock_socket_manager
+                "workspace_123"
             )
 
         mock_socket_manager.leave_room.assert_called_once_with("user_123", "workspace_123")
 
-    async def test_broadcast_to_workspace(self):
+    def test_broadcast_to_workspace(self):
         """Test broadcasting events to workspace members."""
-        # Test expects sio_manager as second positional param
         mock_socket_manager = MagicMock()
 
-        mock_broadcast = MagicMock()
-
-        mock_socket_manager.broadcast = mock_broadcast
-
-        with patch('app.services.socket_helpers.simple_socket_manager', return_value=mock_socket_manager):
-
-            await broadcast_to_workspace(
+        with patch('app.services.socket_helpers.simple_socket_manager', mock_socket_manager):
+            broadcast_to_workspace(
                 "test_event",
                 {"data": "test"},
-                "workspace_123",
-                mock_socket_manager
+                "workspace_123"
             )
 
-        mock_socket_manager.broadcast.assert_called_once_with("test_event", {"data": "test"}, "workspace_123")
+        mock_socket_manager.broadcast.assert_called_once_with("test_event", "workspace_123", {"data": "test"})

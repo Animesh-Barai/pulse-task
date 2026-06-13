@@ -16,8 +16,18 @@ const Register: React.FC = () => {
     setError('');
 
     try {
-      await api.post('/api/v1/auth/signup', { name, email, password });
-      navigate('/login', { state: { message: 'Account created successfully! Please sign in.' } });
+      const response = await api.post('/api/v1/auth/signup', { name, email, password });
+      
+      // Auto-login: Store tokens and user info from signup response
+      const { tokens, user: userData } = response.data;
+      if (tokens && tokens.access_token) {
+        localStorage.setItem('token', tokens.access_token);
+        localStorage.setItem('refresh_token', tokens.refresh_token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        navigate('/');
+      } else {
+        navigate('/login', { state: { message: 'Account created! Please sign in.' } });
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to create account');
     } finally {

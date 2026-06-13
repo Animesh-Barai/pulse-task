@@ -120,7 +120,7 @@ async def apply_crdt_operations(
     Updates the Yjs state with operations applied while user was offline.
     """
     try:
-        from app.services.crdt_service import update_ydoc_snapshot
+        from app.services.crdt_service import update_ydoc_snapshot, get_ydoc
 
         # Get current state
         ydoc = await get_ydoc(ydoc_key, db)

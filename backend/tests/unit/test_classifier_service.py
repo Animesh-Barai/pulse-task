@@ -11,6 +11,14 @@ class TestClassifierService:
     Tests are designed to FAIL because classifier_service doesn't exist yet (RED phase).
     """
 
+    @pytest.fixture(autouse=True)
+    def mock_ai_service(self, monkeypatch):
+        """Mock the outbound HTTP calls to the AI service by patching mock_classify."""
+        from app.services.classifier_service import heuristics_suggest
+        async def mock_classify_func(raw_title, raw_description, context):
+            return await heuristics_suggest(raw_title, raw_description, context)
+        monkeypatch.setattr("app.services.classifier_service.mock_classify", mock_classify_func)
+
     async def test_mock_classifier_input_output(self):
         """Test mock classifier with known input/output."""
         # Arrange

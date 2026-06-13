@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from app.services.auth_service import (
     create_user,
     authenticate_user,
@@ -17,6 +17,7 @@ from app.core.security import (
 from app.models.models import UserCreate, User
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional
+from app.core.config import settings
 
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Authentication"])
@@ -25,7 +26,7 @@ router = APIRouter(prefix="/api/v1/auth", tags=["Authentication"])
 class SignupRequest(BaseModel):
     email: EmailStr
     name: str
-    password: str
+    password: str = Field(..., min_length=settings.PASSWORD_MIN_LENGTH)
 
 
 class LoginRequest(BaseModel):
@@ -36,6 +37,7 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
+    user: User
     token_type: str = "bearer"
 
 
@@ -58,25 +60,27 @@ async def signup(
     """
     from app.services.auth_service import get_user_by_email
 
-    # Check if user already exists
-    existing_user = await get_user_by_email(request.email, db)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered"
-        )
-
-    # Create new user
-    user = await create_user(
-        UserCreate(
+    # Use AuthService for registration to get tokens
+    from app.services.auth_service import AuthService
+    auth_service = AuthService(db)
+    
+    try:
+        result = await auth_service.register(
             email=request.email,
-            name=request.name,
-            password=request.password
-        ),
-        db
-    )
-
-    return user
+            password=request.password,
+            name=request.name
+        )
+        return result
+    except ValueError as e:
+        if "already registered" in str(e):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=str(e)
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -97,17 +101,18 @@ async def login(
         )
 
     # Create access token
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(user.id)
 
     # Create refresh token
-    refresh_token = create_jwt_refresh_token(data={"sub": user.id})
+    refresh_token = create_jwt_refresh_token(user.id)
 
     # Store refresh token in database
     await create_refresh_token_in_db(user.id, refresh_token, db)
 
     return TokenResponse(
         access_token=access_token,
-        refresh_token=refresh_token
+        refresh_token=refresh_token,
+        user=user
     )
 
 
@@ -154,11 +159,20 @@ async def refresh_access_token(
             detail="Invalid refresh token"
         )
 
+    # Fetch user to satisfy TokenResponse
+    from app.services.auth_service import get_user_by_id
+    user = await get_user_by_id(user_id, db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found"
+        )
+
     # Create new access token
-    access_token = create_access_token(data={"sub": user_id})
+    access_token = create_access_token(user_id)
 
     # Create new refresh token
-    new_refresh_token = create_jwt_refresh_token(data={"sub": user_id})
+    new_refresh_token = create_jwt_refresh_token(user_id)
 
     # Store new refresh token
     await create_refresh_token_in_db(user_id, new_refresh_token, db)
@@ -168,7 +182,8 @@ async def refresh_access_token(
 
     return TokenResponse(
         access_token=access_token,
-        refresh_token=new_refresh_token
+        refresh_token=new_refresh_token,
+        user=user
     )
 
 

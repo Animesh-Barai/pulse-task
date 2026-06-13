@@ -1,9 +1,23 @@
-import PresenceDots from './realtime/PresenceDots'
+import React, { useState, useEffect } from 'react';
+import PresenceDots from './realtime/PresenceDots';
+import { aiService } from '../services/aiService';
 
 export default function Navbar() {
-  const [isAiOnline, setIsAiOnline] = useState(false)
+  const [isAiOnline, setIsAiOnline] = useState(false);
 
-  // ... existing checkAi logic ...
+  useEffect(() => {
+    const checkAi = async () => {
+      try {
+        const healthy = await aiService.checkHealth();
+        setIsAiOnline(healthy);
+      } catch {
+        setIsAiOnline(false);
+      }
+    };
+    checkAi();
+    const interval = setInterval(checkAi, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <header className="glass" role="banner" style={{
@@ -27,7 +41,6 @@ export default function Navbar() {
         
         <div 
           role="status"
-// ...rest of navbar...
           aria-label={`AI Agent is ${isAiOnline ? 'online' : 'offline'}`}
           style={{ 
             padding: '0.5rem 1rem', 
@@ -68,5 +81,5 @@ export default function Navbar() {
         </button>
       </div>
     </header>
-  )
+  );
 }

@@ -32,7 +32,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str = Field(...)
+    password: str = Field(..., min_length=settings.PASSWORD_MIN_LENGTH)
 
 
 class UserInDB(UserBase):

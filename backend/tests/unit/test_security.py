@@ -43,26 +43,22 @@ class TestPasswordSecurity:
 
 class TestJWTSecurity:
     def test_create_access_token(self):
-        data = {"sub": "test_user_id", "email": "test@example.com"}
-        token = create_access_token(data)
+        token = create_access_token(user_id="test_user_id", claims={"email": "test@example.com"})
         assert token is not None
         assert isinstance(token, str)
         assert len(token) > 100
 
     def test_create_access_token_with_custom_expiry(self):
-        data = {"sub": "test_user_id"}
-        token = create_access_token(data, expires_delta=timedelta(hours=2))
+        token = create_access_token(user_id="test_user_id", expires_delta=timedelta(hours=2))
         assert token is not None
 
     def test_create_refresh_token(self):
-        data = {"sub": "test_user_id"}
-        token = create_refresh_token(data)
+        token = create_refresh_token(user_id="test_user_id")
         assert token is not None
         assert isinstance(token, str)
 
     def test_decode_valid_token(self):
-        data = {"sub": "test_user_id", "email": "test@example.com"}
-        token = create_access_token(data)
+        token = create_access_token(user_id="test_user_id", claims={"email": "test@example.com"})
         decoded = decode_token(token)
         assert decoded is not None
         assert decoded["sub"] == "test_user_id"
@@ -70,8 +66,7 @@ class TestJWTSecurity:
         assert decoded["type"] == "access"
 
     def test_decode_refresh_token(self):
-        data = {"sub": "test_user_id"}
-        token = create_refresh_token(data)
+        token = create_refresh_token(user_id="test_user_id")
         decoded = decode_token(token)
         assert decoded is not None
         assert decoded["type"] == "refresh"
@@ -81,13 +76,11 @@ class TestJWTSecurity:
         assert decoded is None
 
     def test_access_token_has_expiry(self):
-        data = {"sub": "test_user_id"}
-        token = create_access_token(data)
+        token = create_access_token(user_id="test_user_id")
         decoded = decode_token(token)
         assert "exp" in decoded
 
     def test_refresh_token_has_expiry(self):
-        data = {"sub": "test_user_id"}
-        token = create_refresh_token(data)
+        token = create_refresh_token(user_id="test_user_id")
         decoded = decode_token(token)
         assert "exp" in decoded

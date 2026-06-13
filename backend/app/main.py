@@ -47,7 +47,9 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "http://0.0.0.0:3000"
+        "http://0.0.0.0:3000",
+        "http://localhost",
+        "http://127.0.0.1"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -57,6 +59,7 @@ app.add_middleware(
 # Include FastAPI routers
 app.include_router(auth.router)
 app.include_router(crdt.router)
+app.include_router(crdt.offline_router)
 app.include_router(tasks.router)
 app.include_router(presence.router)
 app.include_router(ai.router)

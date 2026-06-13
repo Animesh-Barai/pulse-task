@@ -7,6 +7,8 @@ import Team from './components/Team'
 import Sidebar from './components/Sidebar'
 import Navbar from './components/Navbar'
 import TaskModal from './components/TaskModal'
+import { taskService, Task } from './services/taskService'
+import { socketService } from './services/socket'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
