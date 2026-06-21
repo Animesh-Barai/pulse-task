@@ -155,14 +155,19 @@ class TestSocketIOLoad:
 
         operation_times = []
 
+        def precise_sleep(duration):
+            start = time.perf_counter()
+            while time.perf_counter() - start < duration:
+                pass
+
         def track_redis_operation(op_type):
             op_start = time.perf_counter()
             if op_type == "SET":
-                time.sleep(0.003)
+                precise_sleep(0.003)
             elif op_type == "GET":
-                time.sleep(0.002)
+                precise_sleep(0.002)
             elif op_type == "KEYS":
-                time.sleep(0.008)
+                precise_sleep(0.008)
             op_end = time.perf_counter()
             operation_times.append({
                 "type": op_type,
